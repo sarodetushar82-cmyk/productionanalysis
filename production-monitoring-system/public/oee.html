@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OEE Analysis - Factory 4.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <h1><i class="fas fa-industry"></i> Factory 4.0 Monitoring</h1>
+        </div>
+        <nav>
+            <a href="/">Dashboard</a>
+            <a href="/reports.html">Reports</a>
+            <a href="/oee.html" class="active">OEE</a>
+            <a href="#">Alarms</a>
+            <a href="#">Settings</a>
+            <a href="#" onclick="logout()" style="color: var(--accent-red);"><i class="fas fa-sign-out-alt"></i>
+                Logout</a>
+        </nav>
+    </header>
+    <script>
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/login.html';
+        }
+    </script>
+
+    <div class="dashboard-container">
+        <!-- Filter Ribbon -->
+        <div class="filter-bar">
+            <div class="filter-group">
+                <i class="fas fa-filter"></i> <span>Cell:</span>
+                <select id="cellFilter">
+                    <option value="all">All Cells</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <span>Shift:</span>
+                <select id="shiftFilter">
+                    <option value="">All Shifts</option>
+                    <option value="Shift A">Shift A</option>
+                    <option value="Shift B">Shift B</option>
+                    <option value="Shift C">Shift C</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <span>Date:</span>
+                <input type="date" id="oeeDate">
+            </div>
+            <button id="loadOeeBtn" class="btn-primary" style="margin-left: 10px;">
+                <i class="fas fa-sync"></i> Load
+            </button>
+        </div>
+
+        <!-- OEE Widget Row -->
+        <div
+            style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+
+            <!-- Plant OEE -->
+            <div class="widget-card" style="text-align: center;">
+                <div class="widget-title">Plant Overall Efficiency</div>
+                <div style="position: relative; width: 200px; height: 200px; margin: 0 auto;">
+                    <canvas id="plantOeeGauge"></canvas>
+                    <div
+                        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5rem; font-weight: 700; color: white;">
+                        <span id="plantOeeValue">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison Chart -->
+            <div class="widget-card">
+                <div class="widget-title">Cell Efficiency Comparison</div>
+                <canvas id="oeeBarChart"></canvas>
+            </div>
+
+        </div>
+
+        <!-- Detailed Table -->
+        <div class="widget-card" style="grid-column: 1 / -1;">
+            <div class="widget-title">Detailed Cell OEE Metrics</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cell Name</th>
+                        <th>Availability</th>
+                        <th>Performance</th>
+                        <th>Quality</th>
+                        <th>OEE %</th>
+                    </tr>
+                </thead>
+                <tbody id="oeeTableBody">
+                    <!-- Rows injected via JS -->
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script src="js/oee.js"></script>
+</body>
+
+</html>

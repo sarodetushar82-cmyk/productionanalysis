@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Production Monitor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <h1><i class="fas fa-industry"></i> Factory 4.0 Monitoring</h1>
+        </div>
+        <nav>
+            <a href="/">Dashboard</a>
+            <a href="/reports.html" class="active">Reports</a>
+            <a href="/oee.html">OEE</a>
+            <a href="#">Alarms</a>
+            <a href="#">Settings</a>
+            <a href="#" onclick="logout()" style="color: var(--accent-red);"><i class="fas fa-sign-out-alt"></i>
+                Logout</a>
+        </nav>
+    </header>
+    <script>
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/login.html';
+        }
+    </script>
+
+    <div class="dashboard-container" style="display: block;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="color: var(--text-primary); font-weight: 600;"><i class="fas fa-file-alt"></i> Daily Production
+                Report</h2>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <div class="filter-group">
+                    <i class="fas fa-filter"></i>
+                    <select id="shiftFilter">
+                        <option value="">All Shifts</option>
+                        <option value="Shift A">Shift A</option>
+                        <option value="Shift B">Shift B</option>
+                        <option value="Shift C">Shift C</option>
+                    </select>
+                </div>
+
+                <input type="date" id="reportDate">
+
+                <button id="loadBtn"
+                    style="padding: 0.5rem 1rem; background: var(--accent-blue); border: none; cursor: pointer; color: white; border-radius: 4px; font-weight: 600;">
+                    <i class="fas fa-sync"></i> Load
+                </button>
+                <button id="exportBtn"
+                    style="padding: 0.5rem 1rem; background: var(--accent-green); border: none; cursor: pointer; color: black; border-radius: 4px; font-weight: 600;">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </button>
+                <button id="resetAllBtn"
+                    style="padding: 0.5rem 1rem; background: var(--accent-red); border: none; cursor: pointer; color: white; border-radius: 4px; font-weight: 600;">
+                    <i class="fas fa-undo"></i> Reset All Counters
+                </button>
+            </div>
+        </div>
+
+        <div class="widget-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Shift</th>
+                        <th>Machine</th>
+                        <th>Cell</th>
+                        <th>Good</th>
+                        <th>Reject</th>
+                        <th>Runtime (s)</th>
+                        <th>Downtime (s)</th>
+                    </tr>
+                </thead>
+                <tbody id="reportTableBody">
+                    <!-- Rows will be injected here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const dateInput = document.getElementById('reportDate');
+        dateInput.valueAsDate = new Date();
+
+        async function loadReport() {
+            const date = dateInput.value;
+            const selectedShift = document.getElementById('shiftFilter').value;
+
+            const res = await fetch(`/api/reports/daily?date=${date}`);
+            let data = await res.json();
+
+            if (selectedShift) {
+                data = data.filter(row => row.shift_name === selectedShift);
+            }
+
+            const tbody = document.getElementById('reportTableBody');
+            tbody.innerHTML = data.map(row => `
+                <tr style="border-bottom: 1px solid #333;">
+                    <td style="padding: 1rem;">${row.shift_name}</td>
+                    <td style="padding: 1rem;">${row.machine_name}</td>
+                    <td style="padding: 1rem;">${row.cell}</td>
+                    <td style="padding: 1rem;">${row.total_good}</td>
+                    <td style="padding: 1rem; color: var(--danger-color);">${row.total_reject}</td>
+                    <td style="padding: 1rem;">${row.total_runtime}</td>
+                    <td style="padding: 1rem;">${row.total_downtime}</td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('loadBtn').addEventListener('click', loadReport);
+
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const date = dateInput.value;
+            window.location.href = `/api/reports/export?date=${date}`;
+        });
+
+        document.getElementById('resetAllBtn').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to reset ALL counters? This will clear today\'s production data.')) {
+                try {
+                    const res = await fetch('/api/machines/reset-all', { method: 'POST' });
+                    if (res.ok) {
+                        alert('All counters have been reset.');
+                        loadReport(); // Reload table data
+                    } else {
+                        alert('Failed to reset counters.');
+                    }
+                } catch (err) {
+                    console.error('Reset error:', err);
+                    alert('Error resetting counters.');
+                }
+            }
+        });
+
+        loadReport();
+    </script>
+</body>
+
+</html>

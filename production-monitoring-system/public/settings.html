@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Factory 4.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .settings-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            background: #12141a;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: white;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent-blue);
+            outline: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        .status-msg {
+            margin-top: 1rem;
+            text-align: center;
+            min-height: 1.2em;
+        }
+
+        .success {
+            color: var(--success-color);
+        }
+
+        .error {
+            color: var(--danger-color);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">FACTORY 4.0</div>
+        <nav>
+            <a href="/">Dashboard</a>
+            <a href="/reports.html">Reports</a>
+            <a href="/oee.html">OEE</a>
+            <a href="#" class="active"><i class="fas fa-cog"></i> Settings</a>
+            <a href="#" onclick="logout()" style="color: var(--accent-red);"><i class="fas fa-sign-out-alt"></i>
+                Logout</a>
+        </nav>
+    </header>
+
+    <div class="dashboard-container">
+        <h1 class="page-title">User Settings</h1>
+
+        <div class="settings-container">
+            <h2 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                Change Password</h2>
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="newPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <button type="submit" class="btn-primary">Update Password</button>
+                <div id="statusMsg" class="status-msg"></div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/settings.js"></script>
+    <script>
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/login.html';
+        }
+    </script>
+</body>
+
+</html>
